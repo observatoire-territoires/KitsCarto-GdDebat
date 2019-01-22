@@ -1,0 +1,286 @@
+---
+title: ""
+author: ""
+date: ""
+geometry: "left=1cm,right=1cm,top=1.5cm,bottom=1.5cm"
+output:
+  pdf_document:
+    latex_engine: xelatex
+mainfont: Chalet-LondonSixty.otf
+sansfont: Chalet-NewYorkSixty.otf
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage[table]{xcolor}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage[normalem]{ulem}
+- \usepackage{color, soul}
+- \usepackage{wrapfig}
+- \usepackage{anyfontsize}
+- \usepackage{float}
+- \usepackage{pdfpages}
+- \usepackage{TikZ}
+- \usepackage{afterpage}
+- \usepackage{pagecolor}
+- \usepackage{mdframed}
+- \usepackage[pages=some]{background}
+- \definecolor{rose}{RGB}{162, 62, 72}
+- \definecolor{dutch}{RGB}{251, 250, 248}
+- \definecolor{grisf}{RGB}{80, 82, 83}
+- \definecolor{grisc}{RGB}{167, 170, 170}
+- \definecolor{col1}{RGB}{226, 152, 24}
+- \definecolor{col2}{RGB}{131, 181, 64}
+- \definecolor{col3}{RGB}{0, 77, 124}
+- \definecolor{col4}{RGB}{131, 13, 71}
+- \definecolor{col5}{RGB}{0, 155, 144}
+- \definecolor{col6}{RGB}{2, 130, 65}
+- \definecolor{col7}{RGB}{88, 34, 126}
+- \definecolor{col8}{RGB}{223, 56, 0}
+- \definecolor{col9}{RGB}{214, 125, 19}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+# pdf.options(encoding = "UTF-8")
+```
+
+```{r, include = FALSE, echo = FALSE}
+# Packages
+library(dplyr)
+library(tidyr)
+library(readxl)
+library(sf)
+library(cartography)
+library(gridExtra)
+library(grid)
+library(kableExtra)
+
+# Chargement des données
+datacc <- read_xlsx("data/tableau portrait 201913.xlsx", sheet = "tableau_portrait_201913")
+metacc <- read_xlsx("data/tableau portrait 201913.xlsx", sheet = "meta")
+
+ngeo <- read_xlsx("data/n_geo.xlsx", sheet = "com") %>%
+  select(com2018, dep, reg2016, epci2018) %>%
+  distinct() %>%
+  mutate(epci2018 = as.character(epci2018))
+meta <- read_xlsx("data/meta.xlsx")
+
+epci_geo <- st_read("geo/epci2018.shp")
+dep_geo <- st_read("geo/dep.shp")
+com_geo <- st_read("geo/com2018.shp")
+reg_geo <- st_read("geo/reg2016.shp")
+libepci <- read_xlsx("data/n_geo.xlsx", sheet = "epci2018")
+```
+
+```{r, echo=FALSE, results='asis', warning = FALSE}
+
+###########################################################################################################
+# 1. PAGE DE GARDE
+
+cat("\\backgroundsetup{
+        scale=1,
+        color=black,
+        opacity=1,
+        angle=0,
+        contents={%
+          \\includegraphics[width=\\paperwidth,height=\\paperheight]{img/COUV_GD_2.jpg}
+          }%
+}")
+
+cat(paste0("\\BgThispage
+\\begin{tikzpicture}[overlay, remember picture]
+\\node[anchor=north east, 
+      xshift=-1cm, 
+      yshift=0cm] 
+     at (current page.north east)
+     {\\includegraphics[width=0.4\\textwidth]{cartes/pdg/", epci, ".png}}; 
+\\end{tikzpicture}"))
+
+cat("\\vskip 11cm")
+cat(paste0("\\begin{mdframed}[backgroundcolor=white, userdefinedwidth = 0.56\\textwidth, rightline=false,leftline=false,topline=false,bottomline=false, align=right, rightmargin = +0.5cm, usetwoside=false]
+      \n\\centering\\textcolor{grisf}{\\fontsize{20}{22}\\textsf{", datacc$nom_dep[datacc$epci == epci], "}}
+      \n\\centering\\textcolor{grisf}{\\fontsize{16}{19}\\textsf{", libepci$libgeo[libepci$codgeo == epci], "}}
+    \\end{mdframed}"))
+
+###########################################################################################################
+# 2. PAGES VIERGES
+
+# Page 1
+cat("\n\n\\clearpage\n")
+cat("\n\\begin{flushleft}\\textcolor{grisf}{\\fontsize{16}{19}\\textsf{\\hl{Les enjeux spécifiques au territoire à compléter par l'organisateur du débat}}}
+    \\vskip 1cm")
+
+for(i in 1:20){
+  cat("\n\\vskip 0.5cm
+      \\noindent\\textcolor{grisc}{\\rule{19cm}{0.2pt}}")
+}
+
+cat("\\end{flushleft}")
+
+# Page 2
+cat("\n\n\\clearpage\n")
+cat("\n\\begin{flushleft}\\textcolor{grisf}{\\fontsize{16}{19}\\textsf{\\hl{A compléter par l'organisateur du débat}}}\\end{flushleft}
+    \\vskip 0.5cm")
+cat("\\begin{flushright}\\begin{tikzpicture}
+  \\draw [rounded corners,dotted] (0,0) -- (9,0) -- (9,7.5) -- (0,7.5) -- (0,0);
+\\end{tikzpicture}\\end{flushright}
+\\begin{flushleft}\\begin{tikzpicture}
+  \\draw [rounded corners,dotted] (0,0) -- (9,0) -- (9,7.5) -- (0,7.5) -- (0,0);
+\\end{tikzpicture}\\end{flushleft}
+\\begin{flushright}\\begin{tikzpicture}
+  \\draw [rounded corners,dotted] (0,0) -- (9,0) -- (9,7.5) -- (0,7.5) -- (0,0);
+\\end{tikzpicture}\\end{flushright}")
+
+###########################################################################################################
+# 3. CHIFFRES CLES
+
+# Préparation des tableaux
+depref <- datacc$dep[datacc$epci == epci]
+libdepref <- datacc$nom_dep[datacc$epci == epci]
+regref <- datacc$reg[datacc$epci == epci]
+libregref <- datacc$nom_reg[datacc$epci == epci]
+
+tabccepci <- select(datacc, matches('epci')) %>% rename("codgeo" = "epci") %>%
+  filter(codgeo == epci) %>%
+  mutate_at(vars(3, 7, 11), funs(format(., big.mark = " "))) %>%
+  mutate_at(vars(4:6, 8:10, 12:13), funs(paste0(., " %"))) %>%
+  gather("Indic", "Valeur", 3:13) %>%
+  mutate(Indic = gsub("_epci", "", Indic)) %>%
+  left_join(metacc, by = c("Indic" = "id")) %>%
+  select(lib, Valeur)
+tabccdep <- select(datacc, matches('dep')) %>% distinct() %>% rename("codgeo" = "dep") %>%
+  filter(codgeo == depref) %>%
+  mutate_at(vars(3, 7, 11), funs(format(., big.mark = " "))) %>%
+  mutate_at(vars(4:6, 8:10, 12:13), funs(paste0(., " %"))) %>%
+  gather("Indic", "Valeur", 3:13) %>%
+  mutate(Indic = gsub("_dep", "", Indic)) %>%
+  left_join(metacc, by = c("Indic" = "id")) %>%
+  select(lib, Valeur)
+tabccreg <- select(datacc, matches('reg')) %>% distinct() %>% rename("codgeo" = "reg") %>%
+  filter(codgeo == regref) %>%
+  mutate_at(vars(3, 7, 11), funs(format(., big.mark = " "))) %>%
+  mutate_at(vars(4:6, 8:10, 12:13), funs(paste0(., " %"))) %>%
+  gather("Indic", "Valeur", 3:13) %>%
+  mutate(Indic = gsub("_reg", "", Indic)) %>%
+  left_join(metacc, by = c("Indic" = "id")) %>%
+  select(lib, Valeur)
+tabccfra <- select(datacc, matches('france')) %>% distinct() %>%
+  mutate_at(vars(1, 5, 9), funs(format(., big.mark = " "))) %>%
+  mutate_at(vars(2:4, 6:8, 10:11), funs(paste0(., " %"))) %>%
+  gather("Indic", "Valeur", 1:11) %>%
+  mutate(Indic = gsub("_france", "", Indic)) %>%
+  left_join(metacc, by = c("Indic" = "id")) %>%
+  select(lib, Valeur)
+
+tabccdef <- full_join(tabccepci, tabccdep, by = "lib") %>%
+  full_join(tabccreg, by = "lib") %>%
+  full_join(tabccfra, by = "lib") %>%
+  setNames(c("   ", libepci$libgeo[libepci$codgeo == epci], libdepref, libregref, "France"))
+
+# Affichage des tableaux
+cat("\n\n\\clearpage\n")
+cat(paste0("\n\\begin{flushleft}
+    \\textcolor{grisf}{\\fontsize{28}{33}\\textsf{", datacc$nom_dep[datacc$epci == epci], "}}\n
+    \\vskip 0.1cm
+    \n\\textcolor{grisf}{\\fontsize{28}{33}\\textsf{", libepci$libgeo[libepci$codgeo == epci], "}}\n
+    \\vskip 0.1cm
+    \n\\textcolor{grisc}{\\fontsize{28}{33}\\textsf{Fiche d'identité de mon territoire}}
+    \\vskip 0.3cm"))
+
+cat("\n\\includegraphics{img/pictos/PICTO_POPULATION_ROUGE.png}\n
+\\begin{mdframed}[backgroundcolor=rose, userdefinedwidth = 0.25\\textwidth, rightline=false,leftline=false,topline=false,bottomline=false]
+      \n\\textcolor{dutch}{\\fontsize{16}{19}\\textsf{POPULATION}}
+    \\end{mdframed}")
+
+kable(tabccdef[1:4,], "latex", booktabs = T) %>%
+  kable_styling(full_width = T) %>%
+  column_spec(1, width = "6cm") %>%
+  column_spec(2, bold = T, color = "rose", width = "5cm") %>%
+  row_spec(0, bold = T, font_size = 12)
+
+cat("\\vskip 1cm
+\n\\includegraphics{img/pictos/PICTO_LOGEMENT_VERT.png}\n
+\\begin{mdframed}[backgroundcolor=col5, userdefinedwidth = 0.25\\textwidth,rightline=false,leftline=false,topline=false,bottomline=false]
+      \n\\textcolor{dutch}{\\fontsize{16}{19}\\textsf{LOGEMENT}}
+    \\end{mdframed}")
+
+kable(tabccdef[5:8,], "latex", booktabs = T) %>%
+  kable_styling(full_width = T) %>%
+  column_spec(1, width = "6cm") %>%
+  column_spec(2, bold = T, color = "col5", width = "5cm") %>%
+  row_spec(0, bold = T, font_size = 12)
+
+cat("\\vskip 1cm
+\n\\includegraphics{img/pictos/PICTO_EMPLOI_JAUNE.png}\n
+\\begin{mdframed}[backgroundcolor=col1, userdefinedwidth = 0.25\\textwidth,rightline=false,leftline=false,topline=false,bottomline=false]
+      \n\\textcolor{dutch}{\\fontsize{16}{19}\\textsf{EMPLOI}}
+    \\end{mdframed}\n")
+
+kable(tabccdef[9:11,], "latex", booktabs = T) %>%
+  kable_styling(full_width = T) %>%
+  column_spec(1, width = "6cm") %>%
+  column_spec(2, bold = T, color = "col1", width = "5cm") %>%
+  row_spec(0, bold = T, font_size = 12)
+
+# Sources et note
+cat("\\vskip 0.1cm
+    \n\\textcolor{grisc}\\small Sources : Insee (population au 1er janvier 2016, RP 2015 pour les autres indicateurs)\\newline Note : en cas d'EPCI à cheval sur plusieurs départements, on affecte le département où réside la plus forte part de population de l'EPCI.\\end{flushleft}\n")
+
+###########################################################################################################
+# 4. FICHE INDICATEURS
+
+for(indic in meta$id){
+    
+  cat("\n\n\\clearpage\n")
+      
+  # Carte France et description de l'indicateur
+ cat(paste0("
+\n\\begin{minipage}[t][6cm][t]{0.7\\textwidth}
+    \n\\begin{flushleft}\\textcolor{grisf}{\\fontsize{35}{42}\\textsf{", toupper(meta$theme[meta$id == indic]), "\n}}
+    \\vskip 0.1cm
+    \n\\textcolor{grisc}{\\fontsize{16}{19}\\textsf{", meta$lib[meta$id == indic], "\n}}
+    \\bigskip
+    \n\\textcolor{", meta$col[meta$id == indic], "}{\\fontsize{12}{14}\\textsf{", meta$quest[meta$id == indic], "\n}}
+               \n", meta$desc[meta$id == indic],
+  "\n\\vskip 0.15cm\\includegraphics{img/leg/leg", indic,".jpg}
+\\end{flushleft}\n
+\\end{minipage}
+\\begin{minipage}[t][6cm][t]{0.3\\textwidth}
+  \\begin{figure}[H]
+    \\includegraphics{cartes/nat/", indic, "_nat", ".png}
+  \\end{figure}
+\\end{minipage}"))
+
+  # Carte région
+  cat("\n\\begin{flushleft}\\textcolor{grisf}{\\fontsize{12}{0}\\textsf{FOCUS SUR LA REGION}}")
+  cat("\n\\textcolor{grisc}{\\fontsize{10}{0}{par intercommunalités}}\n")
+  cat(paste0("\n\\includegraphics[width=0.9\\textwidth]{cartes/reg/", indic, "_reg_", epci, ".png}\n"))
+  
+  # Carte locale
+  cat("\n\\textcolor{grisf}{\\fontsize{12}{0}\\textsf{FOCUS SUR LE TERRITOIRE}}")
+  cat("\n\\textcolor{grisc}{\\fontsize{10}{0}{par communes}}\n")
+  cat(paste0("\n\\includegraphics[width=0.9\\textwidth]{cartes/loc/", indic, "_loc_", epci, ".png}\n"))
+
+  # Source
+  cat(paste0("\n\\textcolor{grisc}{\\small{Source : ", meta$src[meta$id == indic], ", ", meta$an[meta$id == indic], " © CGET, Observatoire des territoires, 2018}}\\end{flushleft}\n"))
+  
+}
+
+###########################################################################################################
+# 5. PLANCHES REGIONALES
+
+temp <- filter(ngeo, epci2018 == epci)
+listreg <- unique(temp$reg2016)
+
+for(reg in listreg){
+  cat("\n\n\\clearpage\n")
+  cat(paste0("\\includepdf[pages={1-},scale=1]{img/planchesreg/PORTRAIT_", reg,".pdf}"))
+}
+```
