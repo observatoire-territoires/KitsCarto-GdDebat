@@ -4,7 +4,7 @@
   <img src="https://raw.githubusercontent.com/observatoire-territoires/KitsCarto-GdDebat/master/img/logoGDN.png" width="256">
 </p>     
      
-Les scripts présents dans ce dossier permettent la production automatisée des dossiers cartographiques réalisés dans le cadre du Grand Débat National lancé le 15 janvier 2019 (https://granddebat.fr/?gclid=CKjW3-LkgeACFU2ShQod1yIKWQ). 
+Les scripts présents dans ce dossier permettent la production automatisée des dossiers cartographiques réalisés dans le cadre du Grand Débat National lancé le 15 janvier 2019 (https://granddebat.fr). 
 
 Les kits cartographiques créés grâce à ces scripts sont disponibles pour l'ensemble des EPCI grâce à une carte interactive accessible au lien suivant : 
 
