@@ -26,7 +26,7 @@ for(terr in listepci){
 
   rmarkdown::render(input = "dossierCarto.Rmd", 
                     output_format = "pdf_document",
-                    output_file = paste0("kit_", epci,".pdf"),
+                    output_file = paste0(nomcom,".pdf"),
                     output_dir = "rapports",
                  encoding = "UTF-8")
   
