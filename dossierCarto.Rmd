@@ -6,8 +6,8 @@ geometry: "left=1cm,right=1cm,top=1.5cm,bottom=1.5cm"
 output:
   pdf_document:
     latex_engine: xelatex
-mainfont: Chalet-LondonSixty.otf
-sansfont: Chalet-NewYorkSixty.otf
+mainfont: IBM Plex Sans Regular
+sansfont: IBM Plex Sans Medium
 header-includes:
 - \usepackage{booktabs}
 - \usepackage{longtable}
@@ -84,17 +84,7 @@ libepci <- read_xlsx("data/n_geo.xlsx", sheet = "epci2018")
 ###########################################################################################################
 # 1. PAGE DE GARDE
 
-cat("\\backgroundsetup{
-        scale=1,
-        color=black,
-        opacity=1,
-        angle=0,
-        contents={%
-          \\includegraphics[width=\\paperwidth,height=\\paperheight]{img/COUV_GD_2.jpg}
-          }%
-}")
-
-cat(paste0("\\BgThispage
+cat(paste0("
 \\begin{tikzpicture}[overlay, remember picture]
 \\node[anchor=north east, 
       xshift=-1cm, 
